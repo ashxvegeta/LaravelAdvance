@@ -20,9 +20,10 @@ class UserRegistered
      *
      * @return void
      */
-    public function __construct()
+      public $user;
+     public function __construct(User $user)
     {
-        //
+        $this->user = $user; // ✅ Assign it in constructor
     }
 
     /**
