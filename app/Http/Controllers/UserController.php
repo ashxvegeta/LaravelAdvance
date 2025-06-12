@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Jobs\SendWelcomeEmail;
 
 class UserController extends Controller
 {
@@ -23,9 +24,9 @@ class UserController extends Controller
         'password' => Hash::make($request->password)
     ]);
 
-    // Trigger Welcome Email Event if set up
-    event(new \App\Events\UserRegistered($user));
+      // Queue the welcome email
+     SendWelcomeEmail::dispatch($user);
 
-    return back()->with('success', 'Registration successful. Please check your email.');
+    return back()->with('success', 'User registered, email will be sent.');
 }
 }
