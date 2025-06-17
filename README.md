@@ -1,42 +1,72 @@
-1. Create a Job
-php artisan make:job SendWelcomeEmail
+🛠️ 1. Create the Notification
+php artisan make:notification WelcomeUserNotification
 
 
- 2. Implement Logic in the Job
+🧠 2. Define Channels (Email & Database)
+Open WelcomeUserNotification.php and update it like this:
+namespace App\Notifications;
 
- Inside your SendWelcomeEmail job:
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 
-use App\Mail\WelcomeEmail;
-use Illuminate\Support\Facades\Mail;
-
-public function handle()
+class WelcomeUserNotification extends Notification implements ShouldQueue
 {
-    Mail::to($this->user->email)->send(new WelcomeEmail($this->user));
+    use Queueable;
+
+    public function __construct()
+    {
+        //
+    }
+
+    // CHANNELS
+    public function via($notifiable)
+    {
+        return ['mail', 'database'];
+    }
+
+    // EMAIL content
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+                    ->subject('Welcome to Our App!')
+                    ->greeting('Hello!')
+                    ->line('Thank you for registering.')
+                    ->action('Visit Our Website', url('/'))
+                    ->line('We’re glad to have you with us!');
+    }
+
+    // DATABASE content
+    public function toDatabase($notifiable)
+    {
+        return [
+            'message' => 'Welcome to Our App!',
+            'user_id' => $notifiable->id,
+        ];
+    }
 }
 
+🧑‍💻 3. Trigger Notification on User Registration
+In your UserController@store, add this after user creation:
 
-3. Dispatch the Job
+use App\Notifications\WelcomeUserNotification;
 
-SendWelcomeEmail::dispatch($user);
-You likely did this inside your Event Listener like:
+// after creating the user
+$user->notify(new WelcomeUserNotification());
 
 
-public function handle(UserRegistered $event)
-{
-    SendWelcomeEmail::dispatch($event->user);
-}
-
-4. Set Up Queue Driver
-   
-QUEUE_CONNECTION=database
-php artisan queue:table
+🛢️ 4. Set Up Database Notifications Table
+php artisan notifications:table
 php artisan migrate
 
 
-5. Run the Queue Worker
-php artisan queue:work
+✅ 5. Configure Mail (for email channel)
 
-
-6. Optional: Monitor the Queue
-
-php artisan queue:work --tries=3 --timeout=60
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_mailtrap_username
+MAIL_PASSWORD=your_mailtrap_password
+MAIL_FROM_ADDRESS=hello@example.com
+MAIL_FROM_NAME="${APP_NAME}"
