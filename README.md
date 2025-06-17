@@ -70,3 +70,28 @@ MAIL_USERNAME=your_mailtrap_username
 MAIL_PASSWORD=your_mailtrap_password
 MAIL_FROM_ADDRESS=hello@example.com
 MAIL_FROM_NAME="${APP_NAME}"
+
+
+
+✅ Use Laravel Notifications When:
+Situation	Use Notification?	Example
+A user signs up	✅ Yes	Send welcome email + show in notification bell
+A user places an order	✅ Yes	Send order confirmation via email and store in DB
+Password change	✅ Yes	Alert via email
+Admin approval needed	✅ Yes	Notify admin via DB and/or Slack
+Background event needs to notify user	✅ Yes	E.g., async upload completed
+
+
+
+❌ When Not to Use Notifications:
+Situation	Use Notification?	What to use instead
+Internal business logic only	❌ No	Use Events/Listeners, Services
+Just sending one email	❌ No (optional)	Use plain Mail::to()->send() if it’s simple
+Background logic with no user-facing alert	❌ No	Use Jobs/Events
+
+
+ Compared to Events & Jobs:
+Feature	Notifications	Events + Listeners	Jobs
+User-facing	✅ Yes	❌ Not always	❌ Not always
+Multi-channel (email/DB/SMS)	✅ Yes	❌ No	❌ No
+Queuable	✅ Yes	✅ Yes	✅ Yes
