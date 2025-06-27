@@ -1,35 +1,46 @@
-Create the middleware:
+🧱 1. Create Middleware
+php artisan make:middleware TrackUserActivity
 
-php artisan make:middleware AdminMiddleware
 
-Inside app/Http/Middleware/AdminMiddleware.php:
+ 2. Define Middleware Logic
+app/Http/Middleware/TrackUserActivity.php
+
 
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class AdminMiddleware
+class TrackUserActivity
 {
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->check() && auth()->user()->role === 'admin') {
-            return $next($request);
-        }
+        Log::info('User visited: ' . $request->fullUrl());
 
-        abort(403, 'You do not have admin access.');
+        return $next($request);
     }
 }
-Register in app/Http/Kernel.php under $routeMiddleware:
 
-protected $routeMiddleware = [
-    // ...
-    'admin' => \App\Http\Middleware\AdminMiddleware::class,
-];
+Final web group might look like:
+
+'web' => [
+    \App\Http\Middleware\EncryptCookies::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\VerifyCsrfToken::class,
+    \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    \App\Http\Middleware\TrackUserActivity::class,
+],
+
+4. Test It
+
+Route::get('/test', function () {
+    return 'You hit the test route!';
+});
 
 
- Use in route:
+Then check your logs:
+storage/logs/laravel.log
 
- Route::get('/admin/dashboard', function () {
-    return 'Welcome Admin!';
-})->middleware(['auth', 'admin']);

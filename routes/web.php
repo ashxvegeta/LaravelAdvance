@@ -30,3 +30,7 @@ Route::get('/dashboard', function () {
 })->middleware('auth');
 
 Route::post('/register', [UserController::class, 'register'])->name('register');
+
+Route::get('/test', function () {
+    return 'You hit the test route!';
+});
