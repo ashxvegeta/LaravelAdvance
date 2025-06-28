@@ -34,3 +34,22 @@ Route::post('/register', [UserController::class, 'register'])->name('register');
 Route::get('/test', function () {
     return 'You hit the test route!';
 });
+
+Route::get('/data', function () {
+    return 'You hit the data page!';
+})->middleware('webguard');
+
+
+Route::get('/no-access', function () {
+    return 'You have noaccess';
+});
+
+Route::get('/login', function () {
+  session()->put('user_id', 1);
+  return redirect('/');
+});
+
+Route::get('/logout', function () {
+  session()->forget('user_id');
+  return redirect('/');
+});
